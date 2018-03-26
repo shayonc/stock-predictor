@@ -20,6 +20,8 @@ if __name__ == '__main__':
     #data, meta_data = ts.get_intraday('TSLA')
     api = tweepy.API(auth);
 
+    #TODO: Read from API_KEYS.json
+
     public_tweets = api.search('Tesla');
 
     for tweet in public_tweets:
