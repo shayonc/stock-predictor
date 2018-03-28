@@ -10,6 +10,8 @@ CONSUMER_SECRET_KEY = ''
 ACCESS_TOKEN = ''
 ACCESS_SECRET_TOKEN = ''
 
+STOCK_NAME = 'TSLA'
+
 
 if __name__ == '__main__':
     data = json.loads(open('API_KEYS.json', 'r').read())
@@ -21,8 +23,8 @@ if __name__ == '__main__':
     ACCESS_SECRET_TOKEN = data['ACCESS_SECRET_TOKEN']
 
     ts = TimeSeries(key=ALPHA_API_KEY)
-    stock_data, meta_data = ts.get_intraday('TSLA')
-    print (stock_data)
+    stock_data, meta_data = ts.get_intraday(STOCK_NAME)
+    print (meta_data)
 
 
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET_KEY);

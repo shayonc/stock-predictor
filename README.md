@@ -1,7 +1,7 @@
 # stock-predictor
 Stock Prediction with LSTM
 
-# Required Dependencies
+### Required Dependencies
 
 Run:
 ```
