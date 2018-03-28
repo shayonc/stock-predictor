@@ -35,7 +35,7 @@ model.fit(
     X_train,
     y_train,
     batch_size=512,
-    nb_epoch=1,
+    nb_epoch=5,
     validation_split=0.05)
 
 
