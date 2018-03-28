@@ -5,8 +5,6 @@ Stock Prediction with LSTM
 
 Run:
 ```
-sudo pip3 install tweepy
-sudo pip3 install alpha_vantage
-sudo pip3 install simplejson
+sudo pip3 install tweepy, alpha_vantage, simplejson, pandas
 ```
 

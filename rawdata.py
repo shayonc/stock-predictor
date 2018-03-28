@@ -22,9 +22,11 @@ if __name__ == '__main__':
     ACCESS_TOKEN = data['ACCESS_TOKEN']
     ACCESS_SECRET_TOKEN = data['ACCESS_SECRET_TOKEN']
 
-    ts = TimeSeries(key=ALPHA_API_KEY)
-    stock_data, meta_data = ts.get_intraday(STOCK_NAME)
+    ts = TimeSeries(key=ALPHA_API_KEY,output_format='pandas')
+    stock_data, meta_data = ts.get_intraday(STOCK_NAME, interval='60min')
+    stock_data.to_csv(STOCK_NAME + '.csv', sep=',')
     print (meta_data)
+    print (stock_data)
 
 
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET_KEY);
