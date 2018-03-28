@@ -5,7 +5,7 @@ import lstm, time #helper libraries
 
 
 #Step 1 Load Data
-X_train, y_train, X_test, y_test = lstm.load_data('data.csv', 50, True)
+X_train, y_train, X_test, y_test = lstm.load_data('sp500.csv', 50, True)
 
 
 #Step 2 Build Model
@@ -27,7 +27,7 @@ model.add(Activation('linear'))
 
 start = time.time()
 model.compile(loss='mse', optimizer='rmsprop')
-print 'compilation time : ', time.time() - start
+print('compilation time : %d' % (time.time() - start))
 
 
 #Step 3 Train the model
