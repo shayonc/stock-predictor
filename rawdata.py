@@ -22,8 +22,12 @@ if __name__ == '__main__':
     ACCESS_TOKEN = data['ACCESS_TOKEN']
     ACCESS_SECRET_TOKEN = data['ACCESS_SECRET_TOKEN']
 
-    ts = TimeSeries(key=ALPHA_API_KEY,output_format='pandas')
-    stock_data, meta_data = ts.get_intraday(STOCK_NAME, interval='60min')
+    ts = TimeSeries(key=ALPHA_API_KEY, output_format='pandas')
+    stock_data, meta_data = ts.get_daily(STOCK_NAME, outputsize='full')
+    #stock_data.drop('2. high', 1)
+    del stock_data['2. high']
+    del stock_data['1. open']
+    del stock_data['3. low']
     stock_data.to_csv(STOCK_NAME + '.csv', sep=',')
     print (meta_data)
     print (stock_data)
