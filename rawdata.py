@@ -1,6 +1,7 @@
 import tweepy
 from alpha_vantage.timeseries import TimeSeries
 import json
+import re
 
 
 
@@ -11,6 +12,24 @@ ACCESS_TOKEN = ''
 ACCESS_SECRET_TOKEN = ''
 
 STOCK_NAME = 'TSLA'
+
+
+def cleanse_tweet(tweet):
+    # process the tweets
+
+    #Convert to lower case
+    tweet = tweet.lower()
+    #Convert www.* or https?://* to URL
+    tweet = re.sub('((www\.[^\s]+)|(https?://[^\s]+))','URL',tweet)
+    #Convert @username to AT_USER
+    tweet = re.sub('@[^\s]+','AT_USER',tweet)
+    #Remove additional white spaces
+    tweet = re.sub('[\s]+', ' ', tweet)
+    #Replace #word with word
+    tweet = re.sub(r'#([^\s]+)', r'\1', tweet)
+    #trim
+    tweet = tweet.strip('\'"')
+    return tweet
 
 
 if __name__ == '__main__':
@@ -29,8 +48,6 @@ if __name__ == '__main__':
     del stock_data['1. open']
     del stock_data['3. low']
     stock_data.to_csv(STOCK_NAME + '.csv', sep=',')
-    print (meta_data)
-    print (stock_data)
 
 
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET_KEY);
@@ -41,4 +58,4 @@ if __name__ == '__main__':
     public_tweets = api.search('Tesla');
 
     for tweet in public_tweets:
-        print (tweet.text)
+        print (cleanse_tweet(tweet.text))
