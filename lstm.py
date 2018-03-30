@@ -14,13 +14,17 @@ warnings.filterwarnings("ignore") #Hide messy Numpy warnings
 
 def load_data(filename, seq_len, normalise_window):
     f = open(filename, 'rb').read()
-    data = f.decode().split('\n')
+    data = f.decode().split('\r\n')
 
     sequence_length = seq_len + 1
     result = []
     for index in range(len(data) - sequence_length):
         result.append(data[index: index + sequence_length])
-    
+
+    for window in result:
+        for i, item in enumerate(window):
+            window[i] = item.split(',')
+
     if normalise_window:
         result = normalise_windows(result)
 
@@ -33,16 +37,20 @@ def load_data(filename, seq_len, normalise_window):
     y_train = train[:, -1]
     x_test = result[int(row):, :-1]
     y_test = result[int(row):, -1]
-
-    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
-    x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))  
+    print(x_train.shape[0]);
+    print(x_train.shape[1]);
+    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 2))
+    x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 2))
 
     return [x_train, y_train, x_test, y_test]
 
 def normalise_windows(window_data):
     normalised_data = []
     for window in window_data:
-        normalised_window = [((float(p) / float(window[0])) - 1) for p in window]
+        normalised_window = []
+        for entry in window:
+            norm_entry = [((float(entry[0]) / float(window[0][0])) - 1), ((float(entry[1]) / float(window[0][1])) - 1)]
+            normalised_window.append(norm_entry)
         normalised_data.append(normalised_window)
     return normalised_data
 
