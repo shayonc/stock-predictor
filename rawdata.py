@@ -2,6 +2,7 @@ import tweepy
 from alpha_vantage.timeseries import TimeSeries
 import json
 import re
+import vaderSentiment
 
 
 
@@ -31,9 +32,12 @@ def cleanse_tweet(tweet):
     tweet = tweet.strip('\'"')
     return tweet
 
+def vader_sentiment(tweet):
+    return tweet
 
 if __name__ == '__main__':
     data = json.loads(open('API_KEYS.json', 'r').read())
+    analyzer = vaderSentiment.SentimentIntensityAnalyzer()
 
     ALPHA_API_KEY = data['ALPHA_API_KEY']
     CONSUMER_KEY = data['CONSUMER_KEY']
@@ -58,4 +62,7 @@ if __name__ == '__main__':
     public_tweets = api.search('Tesla');
 
     for tweet in public_tweets:
-        print (cleanse_tweet(tweet.text))
+        clean_tweet = cleanse_tweet(tweet.text)
+        print(clean_tweet)
+        vs = analyzer.polarity_scores(clean_tweet)
+        print(vs)
