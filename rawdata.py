@@ -1,4 +1,5 @@
 import tweepy
+import time
 from alpha_vantage.timeseries import TimeSeries
 import json
 import re
@@ -13,6 +14,7 @@ ACCESS_TOKEN = ''
 ACCESS_SECRET_TOKEN = ''
 
 STOCK_NAME = 'TSLA'
+TWEET_SAMPLING_TIME = 100
 
 analyzer = vaderSentiment.SentimentIntensityAnalyzer()
 
@@ -43,11 +45,23 @@ def cleanse_tweet(tweet):
 
 class TwitterStreamListener(tweepy.StreamListener):
 
+    def __init__(self, time_limit=60):
+        self.start_time = time.time()
+        self.limit = time_limit
+        self.cumulative_compound = 0
+        super(TwitterStreamListener, self).__init__()
+
     def on_status(self, status):
-        clean_status = cleanse_tweet(status.text)
-        vs = analyzer.polarity_scores(clean_status)
-        print(clean_status)
-        print(vs)
+        if (time.time() - self.start_time) < self.limit:
+            clean_status = cleanse_tweet(status.text)
+            vs = analyzer.polarity_scores(clean_status)
+            print(clean_status)
+            print(vs)
+            self.cumulative_compound += vs['compound']
+            return True
+        else:
+            print(self.cumulative_compound)
+            return False
 
     def on_error(self, status_code):
         if status_code == 420:
@@ -70,13 +84,13 @@ if __name__ == '__main__':
     auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET_TOKEN);
     api = tweepy.API(auth);
 
-    stream_listener = TwitterStreamListener()
+    stream_listener = TwitterStreamListener(TWEET_SAMPLING_TIME)
     stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
     stream.filter(track=['Tesla', 'tesla', 'TSLA'])
 
 
-    public_tweets = api.search('Tesla');
+    #public_tweets = api.search('Tesla');
 
-    for tweet in public_tweets:
-        clean_tweet = cleanse_tweet(tweet.text)
-        print(clean_tweet)
+    #for tweet in public_tweets:
+    #    clean_tweet = cleanse_tweet(tweet.text)
+    #    print(clean_tweet)
