@@ -36,22 +36,26 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
 	return agg
 
 # load dataset
-dataset = read_csv('final.csv', header=0, index_col=0)
+dataset = read_csv('final_log.csv', header=0, index_col=0)
 values = dataset.values
 # ensure all data is float
 values = values.astype('float32')
 # normalize features
 scaler = MinMaxScaler(feature_range=(0, 1))
 scaled = scaler.fit_transform(values)
-# specify the number of lag hours
-n_days = 10
+# specify the number of lag days and number of features
+n_days = 5
 n_features = 4
 # frame as supervised learning
 num_output = 1
 reframed = series_to_supervised(scaled, n_days, num_output)
+# drop frames
 frames_to_drop = []
-for i in range(1, n_features):
-    frames_to_drop.append(n_days * n_features + i)
+for i in range(0, num_output):
+    for j in range(0, n_features):
+        if i == (num_output - 1) and j == 0:
+            continue
+        frames_to_drop.append(n_days * n_features + i * n_features + j)
 reframed.drop(reframed.columns[frames_to_drop], axis=1, inplace=True)
 print(reframed.shape)
 print(reframed.head())
@@ -64,21 +68,20 @@ train = values[:n_train_days, :]
 test = values[n_train_days:, :]
 # split into input and outputs
 n_obs = n_days * n_features
-train_X, train_y = train[:, :n_obs], train[:, -num_output:]
-test_X, test_y = test[:, :n_obs], test[:, -num_output:]
-print(train_X.shape, len(train_X), train_y.shape)
+train_X, train_y = train[:, :n_obs], train[:, -1:]
+test_X, test_y = test[:, :n_obs], test[:, -1:]
 # reshape input to be 3D [samples, timesteps, features]
 train_X = train_X.reshape((train_X.shape[0], n_days, n_features))
 test_X = test_X.reshape((test_X.shape[0], n_days, n_features))
 # reshape output
-train_y = train_y.reshape((train_y.shape[0], num_output));
-test_y = test_y.reshape((test_y.shape[0], num_output));
+train_y = train_y.reshape((train_y.shape[0], 1));
+test_y = test_y.reshape((test_y.shape[0], 1));
 print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
 # design network
 model = Sequential()
 model.add(LSTM(50, input_shape=(train_X.shape[1], train_X.shape[2])))
-model.add(Dense(num_output))
+model.add(Dense(1))
 model.compile(loss='mae', optimizer='adam')
 # fit network
 history = model.fit(train_X, train_y, epochs=50, batch_size=72, validation_data=(test_X, test_y), verbose=2, shuffle=False)
@@ -87,6 +90,9 @@ pyplot.plot(history.history['loss'], label='train')
 pyplot.plot(history.history['val_loss'], label='test')
 pyplot.legend()
 pyplot.show()
+
+print('Train accuracy: %.2f' % round((1-min(history.history['loss']))*100, 2))
+print('Validation accuracy: %.2f' % round((1-min(history.history['val_loss']))*100, 2))
 
 # make a prediction
 yhat = model.predict(test_X)
@@ -105,7 +111,13 @@ inv_y = inv_y[:,0]
 rmse = sqrt(mean_squared_error(inv_y, inv_yhat))
 print('Test RMSE: %.3f' % rmse)
 
-pyplot.plot(inv_y, label='actual')
-pyplot.plot(inv_yhat, label='predicted t')
-pyplot.legend()
-pyplot.show()
+# pyplot.plot(inv_y, label='actual')
+# pyplot.plot(inv_yhat, label='predicted t')
+# pyplot.legend()
+# pyplot.show()
+
+# data_file = open('test3.txt', 'a')
+# for value in inv_y:
+#     data_file.write("%f\n" % value)
+# for value in inv_yhat:
+#     data_file.write("%f\n" % value)
